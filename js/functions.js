@@ -24,6 +24,23 @@ function extractDigits(value) {
   return parseInt(digits, 10);
 }
 
+function timeInMinute (time) {
+  return parseInt(time.split(':')[0], 10) * 60 + parseInt(time.split(':')[1], 10);
+}
+
+function isMeetingOnWorkday (startWorkDay,endWorkDay, startMeeting, durationMeeting) {
+  const startWorkDayMin = timeInMinute(startWorkDay);
+  const endWorkDayMin = timeInMinute(endWorkDay);
+  const startMeetingMin = timeInMinute(startMeeting);
+  return startMeetingMin >= startWorkDayMin && startMeetingMin + durationMeeting <= endWorkDayMin;
+}
+
+isMeetingOnWorkday('08:00', '17:30', '14:00', 90);
+isMeetingOnWorkday('8:0', '10:0', '8:0', 120);
+isMeetingOnWorkday('08:00', '14:30', '14:00', 90);
+isMeetingOnWorkday('14:00', '17:30', '08:0', 90);
+isMeetingOnWorkday('8:00', '17:30', '08:00', 900);
+
 compareStringLength('проверяемая строка', 20);
 compareStringLength('проверяемая строка', 18);
 compareStringLength('проверяемая строка', 10);
