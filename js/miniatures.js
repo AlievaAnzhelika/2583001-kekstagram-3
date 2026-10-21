@@ -9,13 +9,19 @@ const similarPhotoTemplate = document.querySelector('#picture').content.querySel
 const similarPhotos = photos;
 const similarPhotoFragment = document.createDocumentFragment();
 
-similarPhotos.forEach(({url, description, likes, comments}) => {
-  const photoElement = similarPhotoTemplate.cloneNode(true);
-  photoElement.querySelector('.picture__img').src = url;
-  photoElement.querySelector('.picture__img').alt = description;
-  photoElement.querySelector('.picture__comments').textContent = comments.length;
-  photoElement.querySelector('.picture__likes').textContent = likes;
-  similarPhotoFragment.appendChild(photoElement);
-});
+const createDataPictire = () => {
+  similarPhotos.forEach(({url, description, likes, comments}) => {
+    const photoElement = similarPhotoTemplate.cloneNode(true);
 
-similarPhotoElement.appendChild(similarPhotoFragment);
+    photoElement.querySelector('.picture__img').src = url;
+    photoElement.querySelector('.picture__img').alt = description;
+    photoElement.querySelector('.picture__comments').textContent = comments.length;
+    photoElement.querySelector('.picture__likes').textContent = likes;
+
+    similarPhotoFragment.appendChild(photoElement);
+  });
+
+  similarPhotoElement.appendChild(similarPhotoFragment);
+};
+
+export {createDataPictire};
