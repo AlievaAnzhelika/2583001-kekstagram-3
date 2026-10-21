@@ -1,3 +1,3 @@
-import {photos} from './data.js';
+import {createDataPictire} from './miniatures.js';
 
-export {photos};
+createDataPictire();
