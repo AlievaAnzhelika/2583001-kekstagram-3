@@ -1,15 +1,10 @@
-import {photos} from './data.js';
-
 const userPhotos = document.querySelector('.pictures__title');
 userPhotos.classList.remove('visually-hidden');
 
-const similarPhotoElement = document.querySelector('.pictures');
 const similarPhotoTemplate = document.querySelector('#picture').content.querySelector('.picture');
-
-const similarPhotos = photos;
 const similarPhotoFragment = document.createDocumentFragment();
 
-const createDataPictire = () => {
+const createDataPictire = (pictureContainer, similarPhotos) => {
   similarPhotos.forEach(({url, description, likes, comments}) => {
     const photoElement = similarPhotoTemplate.cloneNode(true);
 
@@ -21,7 +16,7 @@ const createDataPictire = () => {
     similarPhotoFragment.appendChild(photoElement);
   });
 
-  similarPhotoElement.appendChild(similarPhotoFragment);
+  pictureContainer.appendChild(similarPhotoFragment);
 };
 
 export {createDataPictire};
