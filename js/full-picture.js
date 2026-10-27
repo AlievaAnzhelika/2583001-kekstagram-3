@@ -3,10 +3,10 @@ import {isEscapeKey} from './util.js';
 const IMG_COMMENT_SIZE = 35;
 
 const bigPicture = document.querySelector('.big-picture');
-const commentsList = document.querySelector('.social__comments');
-const closeButton = document.querySelector('.big-picture__cancel');
-const socialCommentCount = document.querySelector('.social__comment-count');
-const commentsLoader = document.querySelector('.comments-loader');
+const commentsList = bigPicture.querySelector('.social__comments');
+const closeButton = bigPicture.querySelector('.big-picture__cancel');
+const socialCommentCount = bigPicture.querySelector('.social__comment-count');
+const commentsLoader = bigPicture.querySelector('.comments-loader');
 
 const createImgComment = (comment) => {
   const newImgComment = document.createElement('img');
@@ -77,15 +77,4 @@ const openBigPicture = (photo) => {
 
 closeButton.addEventListener('click', closeBigPicture);
 
-const initFullPicture = (photos) => {
-  const pictures = document.querySelectorAll('.picture');
-
-  pictures.forEach((picture, index) => {
-    picture.addEventListener('click', (evt) => {
-      evt.preventDefault();
-      openBigPicture(photos[index]);
-    });
-  });
-};
-
-export {initFullPicture};
+export {openBigPicture};
