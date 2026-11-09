@@ -62,7 +62,7 @@ const pristine = new Pristine(imgForm, {
   errorTextParent: 'img-upload__field-wrapper'
 });
 
-const closePreview = () => {
+const onPreviewClick = () => {
   previewWindow.classList.add('hidden');
   document.body.classList.remove('modal-open');
 
@@ -77,11 +77,11 @@ const closePreview = () => {
 function onDocumentKeydown(evt) {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
-    closePreview();
+    onPreviewClick();
   }
 }
 
-const openPreview = () => {
+const onPreviewChange = () => {
   previewWindow.classList.remove('hidden');
   document.body.classList.add('modal-open');
 
@@ -91,8 +91,8 @@ const openPreview = () => {
   document.addEventListener('keydown', onDocumentKeydown);
 };
 
-closePreviewButton.addEventListener('click', closePreview);
-fileUploadControl.addEventListener('change', openPreview);
+closePreviewButton.addEventListener('click', onPreviewClick);
+fileUploadControl.addEventListener('change', onPreviewChange);
 
 const getHashtags = (value) => {
   const trimmedValue = value.trim();
@@ -101,7 +101,7 @@ const getHashtags = (value) => {
     return [];
   }
 
-  const hashtags = trimmedValue.split(' ');
+  const hashtags = trimmedValue.split(/\s+/);
   return hashtags;
 };
 

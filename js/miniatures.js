@@ -1,10 +1,6 @@
 import {openBigPicture} from './full-picture.js';
 
-const userPhotos = document.querySelector('.pictures__title');
-userPhotos.classList.remove('visually-hidden');
-
 const similarPhotoTemplate = document.querySelector('#picture').content.querySelector('.picture');
-
 
 const createDataPictire = (pictureContainer, similarPhotos) => {
   const similarPhotoFragment = document.createDocumentFragment();
