@@ -1,3 +1,4 @@
+import {sendData} from './api.js';
 import {isEscapeKey} from './util.js';
 
 const MAX_HASHTAGS_COUNT = 5;
@@ -37,6 +38,11 @@ const EFFECT_SETTINGS = {
   }
 };
 
+const SubmitButtonText = {
+  IDLE: 'Опубликовать',
+  SENDING: 'Публикую...',
+};
+
 const imgForm = document.querySelector('.img-upload__form');
 const fileUploadControl = imgForm.querySelector('.img-upload__input');
 const previewWindow = imgForm.querySelector('.img-upload__overlay');
@@ -55,12 +61,24 @@ const imgUploadEffectLevel = imgForm.querySelector('.img-upload__effect-level');
 const effectSlider = imgForm.querySelector('.effect-level__slider');
 const effectList = imgForm.querySelector('.effects__list');
 
+const submitButton = imgForm.querySelector('.img-upload__submit');
+
 
 const pristine = new Pristine(imgForm, {
   classTo: 'img-upload__field-wrapper',
   errorTextClass: 'img-upload__field-wrapper--error',
   errorTextParent: 'img-upload__field-wrapper'
 });
+
+const blockSubmitButton = () => {
+  submitButton.disabled = true;
+  submitButton.textContent = SubmitButtonText.SENDING;
+};
+
+const unblockSubmitButton = () => {
+  submitButton.disabled = false;
+  submitButton.textContent = SubmitButtonText.IDLE;
+};
 
 const onPreviewClick = () => {
   previewWindow.classList.add('hidden');
@@ -147,12 +165,80 @@ pristine.addValidator(
   'Длина комментария не может составлять больше 140 символов'
 );
 
-imgForm.addEventListener('submit', (evt) => {
-  const isValid = pristine.validate();
-  if (!isValid) {
+const setUserFormSubmit = (onSuccess, onFail) => {
+  imgForm.addEventListener('submit', (evt) => {
     evt.preventDefault();
+
+    const isValid = pristine.validate();
+    if (isValid) {
+      blockSubmitButton();
+      sendData(new FormData(evt.target))
+        .then(onSuccess)
+        .catch(() => {
+          onFail();
+        })
+        .finally(unblockSubmitButton);
+    }
+  });
+};
+
+const onFormSubmitSuccess = () => {
+  onPreviewClick();
+
+  const successWindow = document.querySelector('#success').content.querySelector('.success').cloneNode(true);
+  const successButton = successWindow.querySelector('.success__button');
+
+  const closeSuccessWindow = () => {
+    successWindow.remove();
+    document.removeEventListener('keydown', onSuccessKeydown);
+  };
+
+  function onSuccessKeydown(evt) {
+    if (isEscapeKey(evt)) {
+      closeSuccessWindow();
+    }
   }
-});
+
+  successButton.addEventListener('click', closeSuccessWindow);
+
+  successWindow.addEventListener('click', (evt) => {
+    if (evt.target === successWindow) {
+      closeSuccessWindow();
+    }
+  });
+
+  document.body.appendChild(successWindow);
+  document.addEventListener('keydown', onSuccessKeydown);
+};
+
+const onFormSubmitFail = () => {
+  const errorWindow = document.querySelector('#error').content.querySelector('.error').cloneNode(true);
+  const errorButton = errorWindow.querySelector('.error__button');
+
+  const closeErrorWindow = () => {
+    document.removeEventListener('keydown', onErrorKeydown, true);
+    errorWindow.remove();
+  };
+
+  function onErrorKeydown(evt) {
+    if (isEscapeKey(evt)) {
+      evt.preventDefault();
+      evt.stopImmediatePropagation();
+      closeErrorWindow();
+    }
+  }
+
+  errorButton.addEventListener('click', closeErrorWindow);
+
+  errorWindow.addEventListener('click', (evt) => {
+    if (evt.target === errorWindow) {
+      closeErrorWindow();
+    }
+  });
+
+  document.body.append(errorWindow);
+  document.addEventListener('keydown', onErrorKeydown, true);
+};
 
 const onTextFieldKeydown = (evt) => {
   if (isEscapeKey(evt)) {
@@ -254,3 +340,5 @@ effectList.addEventListener('change', (evt) => {
     step: settings.step,
   });
 });
+
+export {setUserFormSubmit, onFormSubmitSuccess, onFormSubmitFail};
