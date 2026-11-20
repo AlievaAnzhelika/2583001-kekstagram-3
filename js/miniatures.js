@@ -2,8 +2,15 @@ import {openBigPicture} from './full-picture.js';
 
 const similarPhotoTemplate = document.querySelector('#picture').content.querySelector('.picture');
 
-const createDataPictire = (pictureContainer, similarPhotos) => {
+const comparePhotos = (photoA, photoB) => {
+  const commentsCountA = photoA.comments.length;
+  const commentsCountB = photoB.comments.length;
+  return commentsCountB - commentsCountA;
+};
+
+const createDataPicture = (pictureContainer, similarPhotos) => {
   const similarPhotoFragment = document.createDocumentFragment();
+  const allPictures = pictureContainer.querySelectorAll('.picture');
 
   similarPhotos.forEach((photo) => {
     const {url, description, comments, likes} = photo;
@@ -22,7 +29,11 @@ const createDataPictire = (pictureContainer, similarPhotos) => {
     similarPhotoFragment.appendChild(photoElement);
   });
 
+  allPictures.forEach((picture) => {
+    picture.remove();
+  });
+
   pictureContainer.appendChild(similarPhotoFragment);
 };
 
-export {createDataPictire};
+export {createDataPicture, comparePhotos};
