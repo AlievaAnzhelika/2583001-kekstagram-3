@@ -11,6 +11,12 @@ const commentsList = bigPicture.querySelector('.social__comments');
 const closeButton = bigPicture.querySelector('.big-picture__cancel');
 const commentsLoader = bigPicture.querySelector('.comments-loader');
 
+const pictureImage = bigPicture.querySelector('.big-picture__img img');
+const pictureCaption = bigPicture.querySelector('.social__caption');
+const likesCount = bigPicture.querySelector('.likes-count');
+const totalCommentsCount = bigPicture.querySelector('.social__comment-total-count');
+const shownCommentsCount = bigPicture.querySelector('.social__comment-shown-count');
+
 const createImgComment = (comment) => {
   const newImgComment = document.createElement('img');
   newImgComment.classList.add('social__picture');
@@ -49,7 +55,7 @@ const showNextComments = () => {
   const nextPartComments = currentComments.slice(displayedCommentsCount, displayedCommentsCount + COMMENTS_STEP);
   createComments(nextPartComments);
   displayedCommentsCount += nextPartComments.length;
-  bigPicture.querySelector('.social__comment-shown-count').textContent = displayedCommentsCount;
+  shownCommentsCount.textContent = displayedCommentsCount;
   if (displayedCommentsCount === currentComments.length) {
     commentsLoader.classList.add('hidden');
   } else {
@@ -71,11 +77,11 @@ function onDocumentKeydown(evt) {
 }
 
 const openBigPicture = (photo) => {
-  bigPicture.querySelector('.big-picture__img img').src = photo.url;
-  bigPicture.querySelector('.big-picture__img img').alt = photo.description;
-  bigPicture.querySelector('.social__caption').textContent = photo.description;
-  bigPicture.querySelector('.likes-count').textContent = photo.likes;
-  bigPicture.querySelector('.social__comment-total-count').textContent = photo.comments.length;
+  pictureImage.src = photo.url;
+  pictureImage.alt = photo.description;
+  pictureCaption.textContent = photo.description;
+  likesCount.textContent = photo.likes;
+  totalCommentsCount.textContent = photo.comments.length;
 
   currentComments = photo.comments;
   displayedCommentsCount = 0;

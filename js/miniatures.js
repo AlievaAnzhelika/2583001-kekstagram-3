@@ -8,7 +8,7 @@ const comparePhotos = (photoA, photoB) => {
   return commentsCountB - commentsCountA;
 };
 
-const createDataPicture = (pictureContainer, similarPhotos) => {
+const renderPhotos = (pictureContainer, similarPhotos) => {
   const similarPhotoFragment = document.createDocumentFragment();
   const allPictures = pictureContainer.querySelectorAll('.picture');
 
@@ -16,8 +16,10 @@ const createDataPicture = (pictureContainer, similarPhotos) => {
     const {url, description, comments, likes} = photo;
     const photoElement = similarPhotoTemplate.cloneNode(true);
 
-    photoElement.querySelector('.picture__img').src = url;
-    photoElement.querySelector('.picture__img').alt = description;
+    const photoImage = photoElement.querySelector('.picture__img');
+
+    photoImage.src = url;
+    photoImage.alt = description;
     photoElement.querySelector('.picture__comments').textContent = comments.length;
     photoElement.querySelector('.picture__likes').textContent = likes;
 
@@ -36,4 +38,4 @@ const createDataPicture = (pictureContainer, similarPhotos) => {
   pictureContainer.appendChild(similarPhotoFragment);
 };
 
-export {createDataPicture, comparePhotos};
+export {renderPhotos, comparePhotos};
