@@ -10,6 +10,15 @@ const SCALE_CONTROL_MIN = 25;
 const SCALE_CONTROL_MAX = 100;
 const SCALE_CONTROL_STEP = 25;
 
+const DEFAULT_SLIDER_SETTINGS = {
+  range: {
+    min: 0,
+    max: 1,
+  },
+  start: 1,
+  step: 0.1,
+};
+
 const EFFECT_SETTINGS = {
   chrome: {
     min: 0,
@@ -67,7 +76,7 @@ const submitButton = uploadForm.querySelector('.img-upload__submit');
 const previewPhotoEffects = document.querySelectorAll('.effects__preview');
 
 let currentObjectUrl;
-
+let currentEffect = 'none';
 
 const pristine = new Pristine(uploadForm, {
   classTo: 'img-upload__field-wrapper',
@@ -85,7 +94,7 @@ const unblockSubmitButton = () => {
   submitButton.textContent = SubmitButtonText.IDLE;
 };
 
-const onPreviewClick = () => {
+const closeUploadForm = () => {
   previewWindow.classList.add('hidden');
   document.body.classList.remove('modal-open');
 
@@ -111,11 +120,11 @@ const onPreviewClick = () => {
 function onDocumentKeydown(evt) {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
-    onPreviewClick();
+    closeUploadForm();
   }
 }
 
-const onPreviewChange = (evt) => {
+const onFileInputChange = (evt) => {
   const file = evt.target.files[0];
 
   if (!file) {
@@ -124,7 +133,7 @@ const onPreviewChange = (evt) => {
 
   const fileName = file.name.toLowerCase();
 
-  const matches = FILE_TYPES.some((it) => fileName.endsWith(`.${it}`));
+  const matches = FILE_TYPES.some((extension) => fileName.endsWith(`.${extension}`));
 
   if (!matches) {
     fileUploadControl.value = '';
@@ -148,8 +157,8 @@ const onPreviewChange = (evt) => {
   document.addEventListener('keydown', onDocumentKeydown);
 };
 
-closePreviewButton.addEventListener('click', onPreviewClick);
-fileUploadControl.addEventListener('change', onPreviewChange);
+closePreviewButton.addEventListener('click', closeUploadForm);
+fileUploadControl.addEventListener('change', onFileInputChange);
 
 const getHashtags = (value) => {
   const trimmedValue = value.trim();
@@ -169,13 +178,13 @@ const validateHashtagCount = (value) => {
 
 const validateHashtagText = (value) => {
   const hashtags = getHashtags(value);
-  return hashtags.every((elem) => HASHTAG_PATTERN.test(elem));
+  return hashtags.every((hashtag) => HASHTAG_PATTERN.test(hashtag));
 };
 
 const validateHashtagRepeat = (value) => {
   const hashtags = getHashtags(value);
-  const hashtagsLowerCase = hashtags.map((tag) => tag.toLowerCase());
-  return new Set(hashtagsLowerCase).size === hashtags.length;
+  const normalizedHashtags = hashtags.map((tag) => tag.toLowerCase());
+  return new Set(normalizedHashtags).size === hashtags.length;
 };
 
 const validateTextDescription = (value) => value.length <= MAX_DESCRIPTION_COUNT;
@@ -222,17 +231,17 @@ const setUserFormSubmit = (onSuccess, onFail) => {
 };
 
 const onFormSubmitSuccess = () => {
-  onPreviewClick();
+  closeUploadForm();
 
   const successWindow = document.querySelector('#success').content.querySelector('.success').cloneNode(true);
   const successButton = successWindow.querySelector('.success__button');
 
   const closeSuccessWindow = () => {
     successWindow.remove();
-    document.removeEventListener('keydown', onSuccessKeydown);
+    document.removeEventListener('keydown', onSuccessDocumentKeydown);
   };
 
-  function onSuccessKeydown(evt) {
+  function onSuccessDocumentKeydown(evt) {
     if (isEscapeKey(evt)) {
       closeSuccessWindow();
     }
@@ -247,7 +256,7 @@ const onFormSubmitSuccess = () => {
   });
 
   document.body.appendChild(successWindow);
-  document.addEventListener('keydown', onSuccessKeydown);
+  document.addEventListener('keydown', onSuccessDocumentKeydown);
 };
 
 const onFormSubmitFail = () => {
@@ -255,11 +264,11 @@ const onFormSubmitFail = () => {
   const errorButton = errorWindow.querySelector('.error__button');
 
   const closeErrorWindow = () => {
-    document.removeEventListener('keydown', onErrorKeydown, true);
+    document.removeEventListener('keydown', onErrorDocumentKeydown, true);
     errorWindow.remove();
   };
 
-  function onErrorKeydown(evt) {
+  function onErrorDocumentKeydown(evt) {
     if (isEscapeKey(evt)) {
       evt.preventDefault();
       evt.stopImmediatePropagation();
@@ -276,7 +285,7 @@ const onFormSubmitFail = () => {
   });
 
   document.body.append(errorWindow);
-  document.addEventListener('keydown', onErrorKeydown, true);
+  document.addEventListener('keydown', onErrorDocumentKeydown, true);
 };
 
 const onTextFieldKeydown = (evt) => {
@@ -288,42 +297,35 @@ const onTextFieldKeydown = (evt) => {
 textHashtags.addEventListener('keydown', onTextFieldKeydown);
 textDescription.addEventListener('keydown', onTextFieldKeydown);
 
+const updateScale = (step) => {
+  const currentScale = parseInt(scaleControlValue.value, 10);
+
+  const newScale = Math.min(
+    SCALE_CONTROL_MAX,
+    Math.max(SCALE_CONTROL_MIN, currentScale + step)
+  );
+
+  scaleControlValue.value = `${newScale}%`;
+  previewImage.style.transform = `scale(${newScale / 100})`;
+};
+
 scaleControlSmaller.addEventListener('click', () => {
-  let newScaleValue = parseInt(scaleControlValue.value, 10);
-
-  if (newScaleValue > SCALE_CONTROL_MIN) {
-    newScaleValue -= SCALE_CONTROL_STEP;
-  }
-
-  scaleControlValue.value = `${newScaleValue}%`;
-  previewImage.style.transform = `scale(${newScaleValue / 100})`;
+  updateScale(-SCALE_CONTROL_STEP);
 });
 
 scaleControlBigger.addEventListener('click', () => {
-  let newScaleValue = parseInt(scaleControlValue.value, 10);
-
-  if (newScaleValue < SCALE_CONTROL_MAX) {
-    newScaleValue += SCALE_CONTROL_STEP;
-  }
-
-  scaleControlValue.value = `${newScaleValue}%`;
-  previewImage.style.transform = `scale(${newScaleValue / 100})`;
+  updateScale(SCALE_CONTROL_STEP);
 });
 
 noUiSlider.create(effectSlider, {
-  range: {
-    min: 0,
-    max: 1,
-  },
-  start: 1,
-  step: 0.1,
+  ...DEFAULT_SLIDER_SETTINGS,
   connect: 'lower',
 });
 
 effectSlider.noUiSlider.on('update', () => {
   effectLevelValue.value = Number(effectSlider.noUiSlider.get());
-  const effect = uploadForm.querySelector('input[name="effect"]:checked');
-  switch (effect.value) {
+
+  switch (currentEffect) {
     case 'none':
       previewImage.style.filter = '';
       break;
@@ -346,28 +348,23 @@ effectSlider.noUiSlider.on('update', () => {
 });
 
 function resetEffect() {
-  effectSlider.noUiSlider.updateOptions({
-    range: {
-      min: 0,
-      max: 1,
-    },
-    start: 1,
-    step: 0.1,
-  });
+  currentEffect = 'none';
+
+  effectSlider.noUiSlider.updateOptions(DEFAULT_SLIDER_SETTINGS);
 
   effectLevelContainer.classList.add('hidden');
   previewImage.style.filter = '';
 }
 
 effectList.addEventListener('change', (evt) => {
-  const effect = evt.target.value;
+  currentEffect = evt.target.value;
 
-  if (effect === 'none') {
+  if (currentEffect === 'none') {
     resetEffect();
     return;
   }
 
-  const settings = EFFECT_SETTINGS[effect];
+  const settings = EFFECT_SETTINGS[currentEffect];
   effectLevelContainer.classList.remove('hidden');
 
   effectSlider.noUiSlider.updateOptions({

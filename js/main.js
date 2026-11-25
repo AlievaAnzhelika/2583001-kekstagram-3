@@ -1,9 +1,7 @@
-import {createDataPicture, comparePhotos} from './miniatures.js';
+import {renderPhotos, comparePhotos} from './miniatures.js';
 import {setUserFormSubmit, onFormSubmitSuccess, onFormSubmitFail} from './form.js';
 import {getData} from './api.js';
-import {ALERT_SHOW_TIME, getRandomInteger, debounce} from './util.js';
-
-const NUMBER_RANDOM_PHOTOS = 10;
+import {ALERT_SHOW_TIME, debounce, getRandomPhotos} from './util.js';
 
 const pictureContainer = document.querySelector('.pictures');
 const imageFilters = document.querySelector('.img-filters');
@@ -22,38 +20,28 @@ const setActiveFilter = (button) => {
 
 getData()
   .then((photos) => {
-    createDataPicture(pictureContainer, photos);
+    renderPhotos(pictureContainer, photos);
 
-    const debounceResult = debounce((filteredPhotos) => {
-      createDataPicture(pictureContainer, filteredPhotos);
+    const renderFilteredPhotos = debounce((filteredPhotos) => {
+      renderPhotos(pictureContainer, filteredPhotos);
     });
 
     imageFilters.classList.remove('img-filters--inactive');
 
     filterDefaultButton.addEventListener('click', () => {
       setActiveFilter(filterDefaultButton);
-      debounceResult(photos);
+      renderFilteredPhotos(photos);
     });
 
     filterRandomButton.addEventListener('click', () => {
       setActiveFilter(filterRandomButton);
-
-      const availablePhotos = photos.slice();
-      const randomPhotos = [];
-
-      for (let i = 0; i < NUMBER_RANDOM_PHOTOS && availablePhotos.length > 0; i++) {
-        const randomIndex = getRandomInteger(0, availablePhotos.length - 1);
-        const deletePhotosArray = availablePhotos.splice(randomIndex, 1);
-        randomPhotos.push(deletePhotosArray[0]);
-      }
-
-      debounceResult(randomPhotos);
+      renderFilteredPhotos(getRandomPhotos(photos));
     });
 
     filterDiscussedButton.addEventListener('click', () => {
       setActiveFilter(filterDiscussedButton);
 
-      debounceResult(photos.slice().sort(comparePhotos));
+      renderFilteredPhotos(photos.slice().sort(comparePhotos));
     });
   })
   .catch(() => {
